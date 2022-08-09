@@ -12,6 +12,7 @@ const items = JSON.stringify([
 
 const requestListener = function (req, res) {
     res.setHeader("Content-Type", "application/json");
+    res.setHeader("Access-Control-Allow-Origin", "*");
     switch (req.url) {
         case "/items":
             res.writeHead(200);

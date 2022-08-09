@@ -22,6 +22,7 @@ npm run lint
 
 ### Run server
 ```
+cd first-servers/
 node html.js
 ```
 

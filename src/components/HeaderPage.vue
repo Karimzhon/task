@@ -29,8 +29,22 @@
 					Каталог
 				</div>
 				<div class="header_search">
-					<input type="text" class="header_search_input" v-model="search" placeholder="Cтроительные смеси">
+					<input type="text"
+						   class="header_search_input"
+						   v-model="search"
+						   v-on:input="getItem()"
+						   @mouseup="test(true)"
+						   placeholder="Cтроительные смеси">
 					<img src="/images/search.svg" alt="Search" class="header_search_icon">
+					<ul class="header_search_list" v-if="search_open && items.length > 0">
+						<li class="header_search_item"
+							@click="changeSearch(item)"
+							v-for="(item, key) in items"
+							:key="key">
+							{{ item.title }}
+						</li>
+					</ul>
+					<div :class="{full_screen: search_open}" @click="search_open = false"></div>
 				</div>
 			</div>
 			<div class="header_right">
@@ -49,7 +63,8 @@
 </template>
 
 <script>
-import Menu from './Menu'
+import Menu from './Menu';
+import axios from 'axios'
 
 export default {
 	name: "HeaderPage",
@@ -60,7 +75,31 @@ export default {
 		return {
 			search: '',
 			new_list: true,
-			name: 'A'
+			name: 'A',
+			items: [],
+			search_open: false,
+		}
+	},
+	methods: {
+		getItem() {
+			axios.get('http://localhost:8000/items')
+				.then((response) => {
+					let arr = [];
+					response.data.filter(item => {
+						if (this.search.length > 0 && item.title.toLowerCase().includes(this.search)) {
+							arr.push(item)
+						}
+					})
+					this.items = arr;
+				})
+		},
+		test(bool) {
+			this.search_open = bool
+		},
+		changeSearch(val) {
+			this.search = val.title
+			this.search_open = false
+			this.getItem();
 		}
 	}
 }
@@ -160,6 +199,28 @@ export default {
 			right: 14px;
 			transform: translateY(-50%);
 		}
+
+		&_list {
+			position: absolute;
+			top: 50px;
+			z-index: 25;
+			background-color: #fff;
+			padding: 20px;
+			list-style: none;
+			width: 100%;
+			box-shadow: -1px -2px 15px 3px #d8d8d8;
+			border-radius: 4px;
+			margin: 0;
+		}
+
+		&_item {
+			margin-bottom: 10px;
+			cursor: pointer;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
 	}
 
 	&_right {
@@ -210,5 +271,14 @@ export default {
 		justify-content: center;
 		border-radius: 50%;
 	}
+}
+.full_screen {
+	background-color: #050f194d;
+	width: 100vw;
+	height: calc(100vh - 120px);
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	z-index: 23;
 }
 </style>
